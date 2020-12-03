@@ -10,40 +10,46 @@ let getDinoData = async () => {
 function mainFunction() {
   getDinoData()
     .then((fetchedDinos) => {
-      // fetch data from form and prepare human object
-      human.setHuman();
-      // hide form
-      toogleFormVisibility();
-      // prepare to add tiles, by setting parent
-      tiles.setParent("grid");
-      // Create Dino Objects from fetched Dinos, as new Dinosaur
-      let dinoObjects = [];
-      fetchedDinos.forEach((dino) => dinoObjects.push(new Dinosaur(dino)));
-      // Add a tile for each Dinosaur
-      // Including the comparison using doComparison with return of human.getFeatures as parameter
-      dinoObjects.forEach((obj) =>
-        tiles.add(obj.imagePath, obj.alt, obj.doComparison(human.getFeatures()))
-      );
-      // shuffle tiles, before adding human tile
-      tiles.shuffle();
-      // add another tile to tilesArr
-      // Here index is given to make sure human is centered
-      tiles.add(
-        human.getImagePath(),
-        "human",
-        human.getName(),
-        Math.round(dinoObjects.length / 2)
-      );
-      // Finally append tiles to DOM, to parent
-      tiles.append();
+      //check form inputs before moving on
+      if (checkValidity()) {
+        // fetch data from form and prepare human object
+        human.setHuman();
+        // hide form
+        toogleElementVisibility("dino-compare");
+        toogleElementVisibility("reset-btn");
+        // prepare to add tiles, by setting parent
+        tiles.setParent("grid");
+        // Create Dino Objects from fetched Dinos, as new Dinosaur
+        let dinoObjects = [];
+        fetchedDinos.forEach((dino) => dinoObjects.push(new Dinosaur(dino)));
+        // Add a tile for each Dinosaur
+        // Including the comparison using doComparison with return of human.getFeatures as parameter
+        dinoObjects.forEach((obj) =>
+          tiles.add(
+            obj.imagePath,
+            obj.alt,
+            obj.doComparison(human.getFeatures())
+          )
+        );
+        // shuffle tiles, before adding human tile
+        tiles.shuffle();
+        // add another tile to tilesArr
+        // Here index is given to make sure human is centered
+        tiles.add(
+          human.getImagePath(),
+          "human",
+          human.getName(),
+          Math.round(dinoObjects.length / 2)
+        );
+        // Finally append tiles to DOM, to parent
+        tiles.append();
+      } else {
+        // output input errors to screen
+        reportValidity();
+      }
     })
     // Having a console.log in catch, to add a simple error handling
     .catch((err) => console.log("An error occurred:", err));
-}
-
-function resetComparison() {
-  tiles.remove();
-  toogleFormVisibility();
 }
 
 // Create Dino Constructor
@@ -109,6 +115,7 @@ const human = (function () {
   function setHuman() {
     // grab relevant DOM Id's from features Object -> features Object single source of truth
     let ids = Object.keys(features);
+
     ids.forEach((id) => processFormData(id));
   }
 
@@ -188,12 +195,33 @@ const tiles = (function () {
   return { setParent, append, shuffle, add, remove };
 })();
 
-// Function to toogle form visibility via css
-function toogleFormVisibility() {
-  const form = document.getElementById("dino-compare");
-  form.classList.toggle("hidden");
+function toogleElementVisibility(id) {
+  const element = document.getElementById(id);
+  element.classList.toggle("hidden");
 }
 
 // submit button execute main function
 const submitButton = document.getElementById("btn");
 submitButton.addEventListener("click", mainFunction);
+
+const resetButton = document.getElementById("reset-btn");
+resetButton.addEventListener("click", resetComparison);
+
+function resetComparison() {
+  tiles.remove();
+  toogleElementVisibility("dino-compare");
+  toogleElementVisibility("reset-btn");
+}
+// additonal logic to mimicry browsers check logic,
+// since inbuild form api is not used
+function checkValidity() {
+  const inputs = document.querySelectorAll("input,select");
+  return Array.prototype.slice
+    .call(inputs)
+    .every((input) => input.checkValidity());
+}
+
+function reportValidity() {
+  const inputs = document.querySelectorAll("input,select");
+  inputs.forEach((input) => input.reportValidity());
+}

@@ -29,11 +29,22 @@
     <form id="dino-compare">
       <div class="form-container">
         <p>Name:</p>
-        <input id="name" class="form-field__full" type="name" name="name" />
+        <input
+          id="name"
+          class="form-field__full"
+          type="name"
+          name="name"
+          required="true"
+        />
         <p>Height</p>
         <label
           >Feet:
-          <input id="feet" class="form-field__short" type="number" name="feet"
+          <input
+            id="feet"
+            class="form-field__short"
+            type="number"
+            name="feet"
+            required
         /></label>
         <label
           >inches:
@@ -42,6 +53,7 @@
             class="form-field__short"
             type="number"
             name="inches"
+            required
         /></label>
         <p>Weight:</p>
         <label
@@ -50,10 +62,11 @@
             class="form-field__full"
             type="number"
             name="weight"
+            required
           />lbs</label
         >
         <p>Diet:</p>
-        <select id="diet" class="form-field__full" name="diet">
+        <select id="diet" class="form-field__full" name="diet" required>
           <option>Herbavor</option>
           <option>Omnivor</option>
           <option>Carnivor</option>
@@ -63,6 +76,9 @@
     </form>
     <!-- .grid to attach tiles to -->
     <main id="grid"></main>
+    <div>
+      <button id="reset-btn" class="hidden">Do another comparison</button>
+    </div>
     <footer>
       <!-- Include information source -->
       <p class="fine-print">
