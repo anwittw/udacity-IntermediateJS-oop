@@ -58,11 +58,13 @@ function Dinosaur(dinoData) {
   this.species = dinoData.species;
   this.diet = dinoData.diet;
   this.weight = dinoData.weight;
+  this.height = dinoData.height;
   this.fact = dinoData.fact;
   this.imagePath = `/images/${dinoData.species.toLowerCase()}.png`;
   this.alt = dinoData.species;
-  this.randomComparisonMethod = Math.floor(Math.random() * 3) + 1;
+  this.randomComparisonMethod = Math.floor(Math.random() * 4) + 1;
   this.doComparison = function (humanFeaturesObj) {
+    if (this.species === "Pigeon") return this.fact;
     switch (this.randomComparisonMethod) {
       //compare weight
       case 1:
@@ -81,7 +83,13 @@ function Dinosaur(dinoData) {
         } else {
           return `While you seem to prefer ${humanFeaturesObj.diet}, the ${this.species} was a fond of being a ${this.diet}`;
         }
-        break;
+      // compare height
+      case 3:
+        if (this.height > humanFeaturesObj.height) {
+          return `With ${this.height} feet, the ${this.species} was way taller, than you are!`;
+        } else {
+          return `You are at least ${humanFeaturesObj.height} greater than the ${this.species} was!`;
+        }
       // no comparison this time, return fact
       default:
         return this.fact;
@@ -100,6 +108,7 @@ const human = (function () {
     diet: "",
     feet: 0,
     inches: 0,
+    totalFeet: 0,
   };
 
   const imgPath = "/images/human.png";
@@ -115,8 +124,14 @@ const human = (function () {
   function setHuman() {
     // grab relevant DOM Id's from features Object -> features Object single source of truth
     let ids = Object.keys(features);
-
     ids.forEach((id) => processFormData(id));
+    calculateTotalFeet();
+  }
+
+  function calculateTotalFeet() {
+    features.totalFeet = Math.round(
+      Number(features.feet) + Number(features.inches) / 12
+    );
   }
 
   function getName() {
@@ -126,6 +141,7 @@ const human = (function () {
     return {
       weight: Number(features.weight),
       diet: features.diet.toLowerCase(),
+      height: Number(features.totalFeet),
     };
   }
 
@@ -188,11 +204,15 @@ const tiles = (function () {
   }
 
   // remove all appended tiles from parent, from DOM
-  function remove() {
+  function removeFromDom() {
     parent.innerHTML = "";
   }
 
-  return { setParent, append, shuffle, add, remove };
+  function empty() {
+    tilesArr = [];
+  }
+
+  return { setParent, append, shuffle, add, removeFromDom, empty };
 })();
 
 function toogleElementVisibility(id) {
@@ -208,7 +228,8 @@ const resetButton = document.getElementById("reset-btn");
 resetButton.addEventListener("click", resetComparison);
 
 function resetComparison() {
-  tiles.remove();
+  tiles.removeFromDom();
+  tiles.empty();
   toogleElementVisibility("dino-compare");
   toogleElementVisibility("reset-btn");
 }
