@@ -177,9 +177,9 @@ const tiles = (function () {
 
   // Method to append tiles to parent element
   function append() {
-    tilesArr.forEach((tile) => {
-      parent.appendChild(tile);
-    });
+    let $tilesArr = new DocumentFragment();
+    tilesArr.forEach((tile) => $tilesArr.appendChild(tile));
+    parent.appendChild($tilesArr);
   }
 
   // Function to create a single tile and add to tilesArr
