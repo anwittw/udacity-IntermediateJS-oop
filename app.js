@@ -1,58 +1,38 @@
-// Grab data from dino.json;
-// Async to emulate request to server
-let getDinoData = async () => {
-  const fetchedData = await fetch("./dino.json");
-  const data = await fetchedData.json();
-  return data.Dinos;
-};
+/
+const $submitButton = document.getElementById("btn");
+const $resetButton = document.getElementById("reset-btn");
 
-//  App logic is defined in main function
-function mainFunction() {
-  getDinoData()
-    .then((fetchedDinos) => {
-      //check form inputs before moving on
-      if (checkValidity()) {
-        // fetch data from form and prepare human object
-        human.setHuman();
-        // hide form
-        toogleElementVisibility("dino-compare");
-        toogleElementVisibility("reset-btn");
-        // prepare to add tiles, by setting parent
-        tiles.setParent("grid");
-        // Create Dino Objects from fetched Dinos, as new Dinosaur
-        let dinoObjects = [];
-        fetchedDinos.forEach((dino) => dinoObjects.push(new Dinosaur(dino)));
-        // Add a tile for each Dinosaur
-        // Including the comparison using doComparison with return of human.getFeatures as parameter
-        dinoObjects.forEach((obj) =>
-          tiles.add(
-            obj.imagePath,
-            obj.alt,
-            obj.doComparison(human.getFeatures())
-          )
-        );
-        // shuffle tiles, before adding human tile
-        tiles.shuffle();
-        // add another tile to tilesArr
-        // Here index is given to make sure human is centered
-        tiles.add(
-          human.getImagePath(),
-          "human",
-          human.getName(),
-          Math.round(dinoObjects.length / 2)
-        );
-        // Finally append tiles to DOM, to parent
-        tiles.append();
-      } else {
-        // output input errors to screen
-        reportValidity();
-      }
-    })
-    // Having a console.log in catch, to add a simple error handling
-    .catch((err) => console.log("An error occurred:", err));
+function toogleElementVisibility(id) {
+  const element = document.getElementById(id);
+  element.classList.toggle("hidden");
 }
 
-// Create Dino Constructor
+function resetComparison() {
+  tiles.removeFromDom();
+  tiles.empty();
+  toogleElementVisibility("dino-compare");
+  toogleElementVisibility("reset-btn");
+}
+
+function checkInputValidity() {
+  const inputs = document.querySelectorAll("input,select");
+  return Array.prototype.slice
+    .call(inputs)
+    .every((input) => input.checkInputValidity());
+}
+
+function reportInputValidity() {
+  const inputs = document.querySelectorAll("input,select");
+  inputs.forEach((input) => input.reportInputValidity());
+}
+
+/*
+Create the 
+- Dinosaur
+- Human
+- Tiles
+Objects.. 
+*/
 
 function Dinosaur(dinoData) {
   this.species = dinoData.species;
@@ -66,7 +46,6 @@ function Dinosaur(dinoData) {
   this.doComparison = function (humanFeaturesObj) {
     if (this.species === "Pigeon") return this.fact;
     switch (this.randomComparisonMethod) {
-      //compare weight
       case 1:
         let differenceInWeight = this.weight - humanFeaturesObj.weight;
         if (differenceInWeight > 0) {
@@ -76,32 +55,25 @@ function Dinosaur(dinoData) {
             differenceInWeight * -1
           } lbs heavier than the ${this.species} was!`;
         }
-      //compare diet
       case 2:
         if (this.diet === humanFeaturesObj.diet) {
           return `Awesome, You and ${this.species} both are ${this.diet} - You could have been good friends!`;
         } else {
           return `While you seem to prefer ${humanFeaturesObj.diet}, the ${this.species} was a fond of being a ${this.diet}`;
         }
-      // compare height
       case 3:
         if (this.height > humanFeaturesObj.height) {
           return `With ${this.height} feet, the ${this.species} was way taller, than you are!`;
         } else {
           return `You are at least ${humanFeaturesObj.height} greater than the ${this.species} was!`;
         }
-      // no comparison this time, return fact
       default:
         return this.fact;
     }
   };
 }
 
-// Use IIFE to get human data from form
 const human = (function () {
-  // Features Object is equivalent to form input ID'S
-  // Human Object is created inside IIFE
-  // -> revealing module pattern
   const features = {
     name: "",
     weight: 0,
@@ -113,7 +85,6 @@ const human = (function () {
 
   const imgPath = "/images/human.png";
 
-  //Process for each input field
   function processFormData(id) {
     const element = document.getElementById(id);
     if (element) {
@@ -122,7 +93,6 @@ const human = (function () {
   }
 
   function setHuman() {
-    // grab relevant DOM Id's from features Object -> features Object single source of truth
     let ids = Object.keys(features);
     ids.forEach((id) => processFormData(id));
     calculateTotalFeet();
@@ -137,6 +107,7 @@ const human = (function () {
   function getName() {
     return features.name;
   }
+
   function getFeatures() {
     return {
       weight: Number(features.weight),
@@ -153,21 +124,13 @@ const human = (function () {
 })();
 
 const tiles = (function () {
-  /*
- ---- private Properties ----
-    parent -> parent DOM-Element, set with setParent
-    tilesArr -> Array of tiles to be appended to parent
-    */
-
   let parent = null;
   let tilesArr = [];
 
-  // Set parent DOM-Element of tiles to be appended, by ID
   function setParent(id) {
     parent = document.getElementById(id);
   }
 
-  // Using the Fisher-Yates Shuffle
   function shuffle() {
     for (let i = tilesArr.length - 1; i > 0; i--) {
       let j = Math.floor(Math.random() * (i + 1));
@@ -175,15 +138,12 @@ const tiles = (function () {
     }
   }
 
-  // Method to append tiles to parent element
   function append() {
     let $tilesArr = new DocumentFragment();
     tilesArr.forEach((tile) => $tilesArr.appendChild(tile));
     parent.appendChild($tilesArr);
   }
 
-  // Function to create a single tile and add to tilesArr
-  // Optional Parameter index -> to add at defined index
   function add(imgPath, alt, punchline, index = null) {
     const tile = document.createElement("div");
     tile.classList.add("grid-item");
@@ -203,7 +163,6 @@ const tiles = (function () {
     }
   }
 
-  // remove all appended tiles from parent, from DOM
   function removeFromDom() {
     parent.innerHTML = "";
   }
@@ -215,34 +174,55 @@ const tiles = (function () {
   return { setParent, append, shuffle, add, removeFromDom, empty };
 })();
 
-function toogleElementVisibility(id) {
-  const element = document.getElementById(id);
-  element.classList.toggle("hidden");
+/* 
+Grabbing data from dino.json, simulating an async request
+*/ 
+
+const getDinoData = async () => {
+  const fetchedData = await fetch("./dino.json");
+  const data = await fetchedData.json();
+  return data.Dinos;
+};
+
+/*
+The mainFunction orchestrates the app logic
+*/
+
+function mainFunction() {
+  getDinoData()
+    .then((fetchedDinos) => {
+      if (checkInputValidity()) {
+        human.setHuman();
+        toogleElementVisibility("dino-compare");
+        toogleElementVisibility("reset-btn");
+        tiles.setParent("grid");
+        let dinoObjects = [];
+        fetchedDinos.forEach((dino) => dinoObjects.push(new Dinosaur(dino)));
+        dinoObjects.forEach((obj) =>
+          tiles.add(
+            obj.imagePath,
+            obj.alt,
+            obj.doComparison(human.getFeatures())
+          )
+        );
+        tiles.shuffle();
+        tiles.add(
+          human.getImagePath(),
+          "human",
+          human.getName(),
+          Math.round(dinoObjects.length / 2)
+        );
+        tiles.append();
+      } else {
+        reportInputValidity();
+      }
+    })
+    .catch((err) => console.log("An error occurred:", err));
 }
 
-// submit button execute main function
-const submitButton = document.getElementById("btn");
-submitButton.addEventListener("click", mainFunction);
+/*
+Coupling main function to the frontend
+*/ 
 
-const resetButton = document.getElementById("reset-btn");
-resetButton.addEventListener("click", resetComparison);
-
-function resetComparison() {
-  tiles.removeFromDom();
-  tiles.empty();
-  toogleElementVisibility("dino-compare");
-  toogleElementVisibility("reset-btn");
-}
-// additonal logic to mimicry browsers check logic,
-// since inbuild form api is not used
-function checkValidity() {
-  const inputs = document.querySelectorAll("input,select");
-  return Array.prototype.slice
-    .call(inputs)
-    .every((input) => input.checkValidity());
-}
-
-function reportValidity() {
-  const inputs = document.querySelectorAll("input,select");
-  inputs.forEach((input) => input.reportValidity());
-}
+$submitButton.addEventListener("click", mainFunction);
+$resetButton.addEventListener("click", resetComparison);
