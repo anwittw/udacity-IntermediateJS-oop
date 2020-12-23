@@ -1,4 +1,3 @@
-/
 const $submitButton = document.getElementById("btn");
 const $resetButton = document.getElementById("reset-btn");
 
@@ -18,12 +17,12 @@ function checkInputValidity() {
   const inputs = document.querySelectorAll("input,select");
   return Array.prototype.slice
     .call(inputs)
-    .every((input) => input.checkInputValidity());
+    .every((input) => input.checkValidity());
 }
 
 function reportInputValidity() {
   const inputs = document.querySelectorAll("input,select");
-  inputs.forEach((input) => input.reportInputValidity());
+  inputs.forEach((input) => input.reportValidity());
 }
 
 /*
@@ -144,13 +143,18 @@ const tiles = (function () {
     parent.appendChild($tilesArr);
   }
 
-  function add(imgPath, alt, punchline, index = null) {
+  function add(imgPath, alt, title, punchline, index = null) {
     const tile = document.createElement("div");
     tile.classList.add("grid-item");
     const img = document.createElement("img");
     img.src = imgPath;
     img.alt = alt;
     tile.appendChild(img);
+    if (title) {
+      const text = document.createElement("h3");
+      text.innerText = title;
+      tile.appendChild(text);
+    }
     if (punchline) {
       const text = document.createElement("h4");
       text.innerText = punchline;
@@ -176,7 +180,7 @@ const tiles = (function () {
 
 /* 
 Grabbing data from dino.json, simulating an async request
-*/ 
+*/
 
 const getDinoData = async () => {
   const fetchedData = await fetch("./dino.json");
@@ -202,6 +206,7 @@ function mainFunction() {
           tiles.add(
             obj.imagePath,
             obj.alt,
+            obj.species,
             obj.doComparison(human.getFeatures())
           )
         );
@@ -209,6 +214,7 @@ function mainFunction() {
         tiles.add(
           human.getImagePath(),
           "human",
+          "Human",
           human.getName(),
           Math.round(dinoObjects.length / 2)
         );
@@ -222,7 +228,7 @@ function mainFunction() {
 
 /*
 Coupling main function to the frontend
-*/ 
+*/
 
 $submitButton.addEventListener("click", mainFunction);
 $resetButton.addEventListener("click", resetComparison);
