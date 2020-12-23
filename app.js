@@ -42,35 +42,48 @@ function Dinosaur(dinoData) {
   this.imagePath = `/images/${dinoData.species.toLowerCase()}.png`;
   this.alt = dinoData.species;
   this.randomComparisonMethod = Math.floor(Math.random() * 4) + 1;
-  this.doComparison = function (humanFeaturesObj) {
-    if (this.species === "Pigeon") return this.fact;
-    switch (this.randomComparisonMethod) {
-      case 1:
-        let differenceInWeight = this.weight - humanFeaturesObj.weight;
-        if (differenceInWeight > 0) {
-          return `The ${this.species} was ${differenceInWeight} lbs heavier than you are!`;
-        } else {
-          return `Way to go, you heavy weight! You are ${
-            differenceInWeight * -1
-          } lbs heavier than the ${this.species} was!`;
-        }
-      case 2:
-        if (this.diet === humanFeaturesObj.diet) {
-          return `Awesome, You and ${this.species} both are ${this.diet} - You could have been good friends!`;
-        } else {
-          return `While you seem to prefer ${humanFeaturesObj.diet}, the ${this.species} was a fond of being a ${this.diet}`;
-        }
-      case 3:
-        if (this.height > humanFeaturesObj.height) {
-          return `With ${this.height} feet, the ${this.species} was way taller, than you are!`;
-        } else {
-          return `You are at least ${humanFeaturesObj.height} greater than the ${this.species} was!`;
-        }
-      default:
-        return this.fact;
-    }
-  };
 }
+
+Dinosaur.prototype.compareWeight = function (humanFeaturesObj) {
+  let differenceInWeight = this.weight - humanFeaturesObj.weight;
+  if (differenceInWeight > 0) {
+    return `The ${this.species} was ${differenceInWeight} lbs heavier than you are!`;
+  } else {
+    return `Way to go, you heavy weight! You are ${
+      differenceInWeight * -1
+    } lbs heavier than the ${this.species} was!`;
+  }
+};
+
+Dinosaur.prototype.compareDiet = function (humanFeaturesObj) {
+  if (this.diet === humanFeaturesObj.diet) {
+    return `Awesome, You and ${this.species} both are ${this.diet} - You could have been good friends!`;
+  } else {
+    return `While you seem to prefer ${humanFeaturesObj.diet}, the ${this.species} was a fond of being a ${this.diet}`;
+  }
+};
+
+Dinosaur.prototype.compareHeight = function (humanFeaturesObj) {
+  if (this.height > humanFeaturesObj.height) {
+    return `With ${this.height} feet, the ${this.species} was way taller, than you are!`;
+  } else {
+    return `You are at least ${humanFeaturesObj.height} feet greater than the ${this.species} was!`;
+  }
+};
+
+Dinosaur.prototype.doComparison = function (humanFeaturesObj) {
+  if (this.species === "Pigeon") return this.fact;
+  switch (this.randomComparisonMethod) {
+    case 1:
+      return this.compareWeight(humanFeaturesObj);
+    case 2:
+      return this.compareDiet(humanFeaturesObj);
+    case 3:
+      return this.compareHeight(humanFeaturesObj);
+    default:
+      return this.fact;
+  }
+};
 
 const human = (function () {
   const features = {
